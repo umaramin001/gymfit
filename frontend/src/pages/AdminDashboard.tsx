@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                         <td className="p-4 text-sm text-white/40">{format(new Date(u.createdAt), 'MMM d, yyyy')}</td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => toggleUserStatus(u.id, u.isActive)}
+                            <button onClick={() => toggleUserStatus(u.id, u.isActive ?? false)}
                               className="p-1 text-white/40 hover:text-white transition-colors">
                               {u.isActive ? <FiX className="w-4 h-4" /> : <FiCheck className="w-4 h-4" />}
                             </button>
