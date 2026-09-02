@@ -119,7 +119,7 @@ async function seedDatabase() {
 }
 
 async function main() {
-  await prisma.$executeRawUnsafe('SELECT 1');
+  await prisma.$queryRaw`SELECT 1`;
   if (process.env.NODE_ENV === 'production') {
     const { execSync } = await import('child_process');
     execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
