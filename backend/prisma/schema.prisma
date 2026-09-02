@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          String    @default("USER")
+  isVerified    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       Profile?
+  workouts      Workout[]
+  schedules     WorkoutSchedule[]
+  notifications Notification[]
+  progress      Progress[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Profile {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  age           Int?
+  gender        String?
+  height        Float?
+  weight        Float?
+  fitnessGoal   String?
+  profilePicture String?
+  bio           String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Exercise {
+  id            String    @id @default(uuid())
+  name          String
+  category      String
+  muscleGroup   String
+  description   String?
+  difficulty    String    @default("INTERMEDIATE")
+  isCustom      Boolean   @default(false)
+  userId        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  workoutExercises WorkoutExercise[]
+
+  @@index([category])
+  @@index([muscleGroup])
+  @@map("exercises")
+}
+
+model Workout {
+  id            String    @id @default(uuid())
+  userId        String
+  name          String
+  date          DateTime  @default(now())
+  duration      Int?
+  totalCalories Int?
+  notes         String?
+  status        String    @default("PLANNED")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises     WorkoutExercise[]
+
+  @@index([userId])
+  @@index([date])
+  @@map("workouts")
+}
+
+model WorkoutExercise {
+  id            String    @id @default(uuid())
+  workoutId     String
+  exerciseId    String
+  order         Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  workout       Workout   @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise      Exercise  @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  sets          WorkoutSet[]
+
+  @@map("workout_exercises")
+}
+
+model WorkoutSet {
+  id                String    @id @default(uuid())
+  workoutExerciseId String
+  setNumber         Int
+  reps              Int?
+  weight            Float?
+  duration          Int?
+  distance          Float?
+  caloriesBurned    Int?
+  isCompleted       Boolean   @default(false)
+  restTime          Int?
+  createdAt         DateTime  @default(now())
+
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
+
+  @@map("workout_sets")
+}
+
+model WorkoutSchedule {
+  id            String    @id @default(uuid())
+  userId        String
+  workoutId     String?   @unique
+  dayOfWeek     Int
+  name          String
+  description   String?
+  startTime     String?
+  duration      Int?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("workout_schedules")
+}
+
+model Progress {
+  id            String    @id @default(uuid())
+  userId        String
+  type          String
+  value         Float
+  unit          String?
+  notes         String?
+  date          DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+  @@map("progress")
+}
+
+model Notification {
+  id            String    @id @default(uuid())
+  userId        String
+  title         String
+  message       String
+  type          String    @default("INFO")
+  isRead        Boolean   @default(false)
+  scheduledAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
