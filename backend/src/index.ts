@@ -119,10 +119,10 @@ async function seedDatabase() {
 }
 
 async function main() {
-  await prisma.$queryRaw`SELECT 1`;
+  await prisma.$connect();
   if (process.env.NODE_ENV === 'production') {
     const { execSync } = await import('child_process');
-    execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
+    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
   }
   await seedDatabase();
   app.listen(PORT, () => {
